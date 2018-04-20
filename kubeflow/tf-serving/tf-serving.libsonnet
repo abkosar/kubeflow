@@ -1,17 +1,28 @@
 {
+  util:: import "kubeflow/tf-serving/util.libsonnet",
+
   // Parameters are intended to be late bound.
   params:: {
     name: null,
-    namespace: null,
     numGpus: 0,
     labels: {
       app: $.params.name,
     },
     modelName: $.params.name,
     modelPath: null,
-    // TODO(jlewi): We should probably default to a string.
-    // We might also want to have a separate boolean to indicate whether or not to use the httpProxy.
-    httpProxyImage: 0,
+
+    version: "v1",
+    firstVersion: true,
+
+    deployIstio: false,
+
+    deployHttpProxy: false,
+    defaultHttpProxyImage: "gcr.io/kubeflow-images-staging/tf-model-server-http-proxy:v20180327-995786ec",
+    httpProxyImage: "",
+    httpProxyImageToUse: if $.params.httpProxyImage == "" then
+      $.params.defaultHttpProxyImage
+    else
+      $.params.httpProxyImage,
 
     serviceType: "ClusterIP",
 
@@ -19,8 +30,8 @@
     // in which case the image used will still depend on whether GPUs are used or not.
     // Users can also override modelServerImage in which case the user supplied value will always be used
     // regardless of numGpus.
-    defaultCpuImage: "gcr.io/kubeflow-images-staging/tf-model-server:v20180227-master",
-    defaultGpuImage: "gcr.io/kubeflow-images-staging/tf-model-server-gpu:v20180305-pr362-7f250ae-5cc7",
+    defaultCpuImage: "gcr.io/kubeflow-images-staging/tf-model-server-cpu:v20180327-995786ec",
+    defaultGpuImage: "gcr.io/kubeflow-images-staging/tf-model-server-gpu:v20180327-995786ec",
     modelServerImage: if $.params.numGpus == 0 then
       $.params.defaultCpuImage
     else
@@ -69,7 +80,11 @@
 
   components:: {
 
-    all::
+    all:: [
+      // Default routing rule for the first version of model.
+      if $.util.toBool($.params.deployIstio) && $.util.toBool($.params.firstVersion) then
+        $.parts.defaultRouteRule,
+    ] + 
       // TODO(jlewi): It would be better to structure s3 as a mixin.
       // As an example it would be great to allow S3 and GCS parameters
       // to be enabled simultaneously. This should be doable because
@@ -126,6 +141,12 @@
           cpu: "4",
         },
       },
+      // The is user and group should be defined in the Docker image.
+      // Per best practices we don't run as the root user.
+      securityContext: {
+        runAsUser: 1000,
+        fsGroup: 1000,
+      },
     },  // tfServingContainer
 
     tfServingContainer+: $.parts.tfServingContainerBase +
@@ -142,7 +163,7 @@
 
     httpProxyContainer:: {
       name: $.params.name + "-http-proxy",
-      image: $.params.httpProxyImage,
+      image: $.params.httpProxyImageToUse,
       imagePullPolicy: "IfNotPresent",
       command: [
         "python",
@@ -167,6 +188,10 @@
           cpu: "4",
         },
       },
+      securityContext: {
+        runAsUser: 1000,
+        fsGroup: 1000,
+      },
     },  // httpProxyContainer
 
 
@@ -174,28 +199,24 @@
       apiVersion: "extensions/v1beta1",
       kind: "Deployment",
       metadata: {
-        name: $.params.name,
+        name: $.params.name + "-" + $.params.version,
         namespace: $.params.namespace,
         labels: $.params.labels,
       },
       spec: {
         template: {
           metadata: {
-            labels: $.params.labels,
+            labels: $.params.labels + { version: $.params.version, },
+            annotations: {
+              "sidecar.istio.io/inject": if $.util.toBool($.params.deployIstio) then "true",
+            },
           },
           spec: {
             containers: [
               $.parts.tfServingContainer,
-              if $.params.httpProxyImage != 0 then
+              if $.util.toBool($.params.deployHttpProxy) then
                 $.parts.httpProxyContainer,
             ],
-            // See:  https://github.com/kubeflow/kubeflow/tree/master/components/k8s-model-server#set-the-user-optional
-            // The is user and group should be defined in the Docker image.
-            // Per best practices we don't run as the root user.
-            securityContext: {
-              runAsUser: 1000,
-              fsGroup: 1000,
-            },
           },
         },
       },
@@ -233,12 +254,12 @@
       spec: {
         ports: [
           {
-            name: "tf-serving",
+            name: "grpc-tf-serving",
             port: 9000,
             targetPort: 9000,
           },
           {
-            name: "tf-serving-proxy",
+            name: "http-tf-serving-proxy",
             port: 8000,
             targetPort: 8000,
           },
@@ -247,6 +268,26 @@
         type: $.params.serviceType,
       },
     },  // tfService
+
+    defaultRouteRule: {
+      apiVersion: "config.istio.io/v1alpha2",
+      kind: "RouteRule",
+      metadata: {
+        name: $.params.name + "-default",
+        namespace: $.params.namespace,
+      },
+      spec: {
+        destination: {
+          name: $.params.name,
+        },
+        precedence: 0,
+        route: [
+          {
+            labels: { version: $.params.version, },
+          },
+        ],
+      },
+    },
 
   },  // parts
 
@@ -273,7 +314,7 @@
           spec: +{
             containers: [
               $.s3parts.tfServingContainer,
-              if $.params.httpProxyImage != 0 then
+              if $.util.toBool($.params.deployHttpProxy) then
                 $.parts.httpProxyContainer,
             ],
           },
@@ -307,7 +348,7 @@
           spec+: {
             containers: [
               $.gcpParts.tfServingContainer,
-              if $.params.httpProxyImage != 0 then
+              if $.util.toBool($.params.deployHttpProxy) then
                 $.parts.httpProxyContainer,
             ],
 
