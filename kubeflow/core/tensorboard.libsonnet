@@ -89,6 +89,7 @@
       name: $.params.name,
       image: $.params.defaultTbImage,
       imagePullPolicy: "IfNotPresent",
+<<<<<<< HEAD
       //args: [
       //  $.params.logDir,
       //  "--port=9000"
@@ -97,6 +98,14 @@
 		              "/usr/local/bin/tensorboard",
                   "--port=9000",
                   "--logdir=" + $.params.logDir,
+=======
+      args: [
+        $.params.logDir,
+        "--port=9000"
+      ],
+      command: [
+		              "/usr/local/bin/tensorboard"
+>>>>>>> 9e8b87c... TensorBoard conversion to prototype (squash)
 		            ],
       ports: [
         {
