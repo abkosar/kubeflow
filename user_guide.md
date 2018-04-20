@@ -30,6 +30,8 @@ This guide will walk you through the basics of deploying and interacting with Ku
 * [Tensorflow](https://www.tensorflow.org/get_started/)
 * [Ksonnet](https://ksonnet.io/docs/tutorial)
 
+For an end to end example illustrating in details how to deploy kubeflow and run a training job from scratch, check out this [tutorial](https://ai.intel.com/lets-flow-within-kubeflow/).
+
 ## Requirements
  * Kubernetes >= 1.8 [see here](https://github.com/kubeflow/tf-operator#requirements)
  * ksonnet version [0.9.2](https://ksonnet.io/#get-started) or later. (See [below](#why-kubeflow-uses-ksonnet) for an explanation of why we use ksonnet)
@@ -195,6 +197,7 @@ tf-hub-lb          ClusterIP      10.11.245.94    <none>        80/TCP         1
 ```
 
 By default we are using ClusterIPs for the JupyterHub UI. This can be changed to one of the following:
+<<<<<<< HEAD
 
 - NodePort (for non-cloud) by issuing
   ```
@@ -208,6 +211,21 @@ By default we are using ClusterIPs for the JupyterHub UI. This can be changed to
   ks apply ${KF_ENV}
   ```
 
+=======
+
+- NodePort (for non-cloud) by issuing
+  ```
+  ks param set kubeflow-core jupyterHubServiceType NodePort
+  ks apply ${KF_ENV}
+  ```
+
+- LoadBalancer (for cloud) by issuing
+  ```
+  ks param set kubeflow-core jupyterHubServiceType LoadBalancer
+  ks apply ${KF_ENV}
+  ```
+
+>>>>>>> upstream/master
 however this will leave your Jupyter notebook open to the Internet.
 
 To connect to your [Jupyter Notebook](http://jupyter.org/index.html) locally:

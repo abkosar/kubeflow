@@ -29,17 +29,31 @@ import (
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	clientset "k8s.io/client-go/kubernetes"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
+<<<<<<< HEAD
+=======
+	core_v1 "k8s.io/api/core/v1"
+	type_v1 "k8s.io/client-go/kubernetes/typed/core/v1"
+	rbac_v1 "k8s.io/api/rbac/v1"
+>>>>>>> upstream/master
 
 	"os"
 	"path"
 	"regexp"
 	"strconv"
 	"strings"
+<<<<<<< HEAD
 
 	v1 "k8s.io/api/storage/v1"
 	k8sVersion "k8s.io/apimachinery/pkg/version"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+=======
+	"k8s.io/api/storage/v1"
+	k8sVersion "k8s.io/apimachinery/pkg/version"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
+	"os/exec"
+>>>>>>> upstream/master
 )
 
 // RecommendedConfigPathEnvVar is a environment variable for path configuration
@@ -49,11 +63,19 @@ const RecommendedConfigPathEnvVar = "KUBECONFIG"
 // whether a storage class is the default.
 const DefaultStorageAnnotation = "storageclass.beta.kubernetes.io/is-default-class"
 
+<<<<<<< HEAD
 const DefaultNamespace = "kubeflow"
 
 // Assume gcloud is on the path.
 const GcloudPath = "gcloud"
 
+=======
+// Assume gcloud is on the path.
+const GcloudPath = "gcloud"
+
+const Kubectl = "/usr/local/bin/kubectl"
+
+>>>>>>> upstream/master
 // TODO(jlewi): If we use the same userid and groupid when running in a container then
 // we shoiuld be able to map in a user's home directory which could be useful e.g for
 // avoiding the oauth flow.
@@ -98,7 +120,11 @@ func getKubeConfigFile() string {
 
 // gGetClusterConfig obtain the config from the Kube configuration used by kubeconfig.
 //
+<<<<<<< HEAD
 func getClusterConfig() (*rest.Config, string, error) {
+=======
+func getClusterConfig() (*rest.Config, error) {
+>>>>>>> upstream/master
 	configFile := getKubeConfigFile()
 
 	if len(configFile) > 0 {
@@ -113,6 +139,7 @@ func getClusterConfig() (*rest.Config, string, error) {
 		rawConfig, err := clientConfig.RawConfig()
 
 		if err != nil {
+<<<<<<< HEAD
 			return nil, "", err
 		}
 
@@ -128,6 +155,17 @@ func getClusterConfig() (*rest.Config, string, error) {
 
 		config, err := clientConfig.ClientConfig()
 		return config, namespace, err
+=======
+			return nil, err
+		}
+
+		if err := modifyGcloudCommand(&rawConfig); err != nil {
+			return nil, err
+		}
+
+		config, err := clientConfig.ClientConfig()
+		return config, err
+>>>>>>> upstream/master
 	}
 
 	// Work around https://github.com/kubernetes/kubernetes/issues/40973
@@ -138,7 +176,11 @@ func getClusterConfig() (*rest.Config, string, error) {
 			panic(err)
 		}
 		if err := os.Setenv("KUBERNETES_SERVICE_HOST", addrs[0]); err != nil {
+<<<<<<< HEAD
 			return nil, "", err
+=======
+			return nil, err
+>>>>>>> upstream/master
 		}
 	}
 	if len(os.Getenv("KUBERNETES_SERVICE_PORT")) == 0 {
@@ -148,7 +190,11 @@ func getClusterConfig() (*rest.Config, string, error) {
 	}
 
 	config, err := rest.InClusterConfig()
+<<<<<<< HEAD
 	return config, DefaultNamespace, err
+=======
+	return config, err
+>>>>>>> upstream/master
 }
 
 func isGke(v *k8sVersion.Info) bool {
@@ -183,6 +229,27 @@ func hasDefaultStorage(sClasses *v1.StorageClassList) bool {
 	return false
 }
 
+<<<<<<< HEAD
+=======
+func setupNamespace(namespaces type_v1.NamespaceInterface, name_space string) error {
+	namespace, err := namespaces.Get(name_space, meta_v1.GetOptions{})
+	if err == nil {
+		log.Infof("Using existing namespace: %v", namespace.Name)
+	} else {
+		log.Infof("Creating namespace: %v for all kubeflow resources", name_space)
+		_, err = namespaces.Create(
+			&core_v1.Namespace{
+				ObjectMeta: meta_v1.ObjectMeta{
+					Name: name_space,
+				},
+			},
+		)
+		return err
+	}
+	return err
+}
+
+>>>>>>> upstream/master
 // Run the tool.
 func Run(opt *options.ServerOption) error {
 	// Check if the -version flag was passed and, if so, print the version and exit.
@@ -190,8 +257,12 @@ func Run(opt *options.ServerOption) error {
 		version.PrintVersionAndExit()
 	}
 
+<<<<<<< HEAD
 	config, namespace, err := getClusterConfig()
 	log.Infof("Using namespace: %v", namespace)
+=======
+	config, err := getClusterConfig()
+>>>>>>> upstream/master
 	if err != nil {
 		return err
 	}
@@ -201,13 +272,48 @@ func Run(opt *options.ServerOption) error {
 		return err
 	}
 
+<<<<<<< HEAD
+=======
+	err = setupNamespace(kubeClient.CoreV1().Namespaces(), opt.NameSpace)
+	if err != nil {
+		return err
+	}
+
+>>>>>>> upstream/master
 	clusterVersion, err := kubeClient.DiscoveryClient.ServerVersion()
 
 	if err != nil {
 		return err
 	}
 
+<<<<<<< HEAD
 	isGke(clusterVersion)
+=======
+	if isGke(clusterVersion) {
+		roleBindingName := "kubeflow-admin"
+		_, err = kubeClient.RbacV1().RoleBindings(opt.NameSpace).Get(roleBindingName, meta_v1.GetOptions{})
+		if err != nil {
+			log.Infof("GKE: create rolebinding kubeflow-admin for role permission")
+			user, err := exec.Command("gcloud", "config", "get-value", "account").Output()
+			if err != nil {
+				return err
+			}
+			username := strings.Trim(string(user), "\t\n ")
+
+			_, err = kubeClient.RbacV1().RoleBindings(opt.NameSpace).Create(
+				&rbac_v1.RoleBinding{
+					ObjectMeta: meta_v1.ObjectMeta{Name: roleBindingName, Namespace: opt.NameSpace},
+					Subjects:   []rbac_v1.Subject{{Kind: "User", Name: username}},
+					RoleRef:    rbac_v1.RoleRef{Kind: "ClusterRole", Name: "cluster-admin"},
+				},
+			)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+>>>>>>> upstream/master
 	log.Infof("Cluster version: %v", clusterVersion.String())
 
 	s := kubeClient.StorageV1()
@@ -237,7 +343,11 @@ func Run(opt *options.ServerOption) error {
 			// TODO(jlewi): What is the proper version to use? It shouldn't be a version like v1.9.0-gke as that
 			// will create an error because ksonnet will be unable to fetch a swagger spec.
 			actions.OptionSpecFlag:              "version:v1.7.0",
+<<<<<<< HEAD
 			actions.OptionNamespace:             namespace,
+=======
+			actions.OptionNamespace:             opt.NameSpace,
+>>>>>>> upstream/master
 			actions.OptionSkipDefaultRegistries: true,
 		}
 

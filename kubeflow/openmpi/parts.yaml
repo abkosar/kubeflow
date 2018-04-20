@@ -20,6 +20,10 @@
    "keywords": [
       "kubeflow",
       "kubernetes",
+<<<<<<< HEAD
+=======
+      "mpi",
+>>>>>>> upstream/master
       "openmpi",
       "horovod"
    ],
