@@ -91,6 +91,7 @@
       imagePullPolicy: "IfNotPresent",
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
       //args: [
       //  $.params.logDir,
       //  "--port=9000"
@@ -102,6 +103,8 @@
 =======
 =======
 >>>>>>> 9e8b87c... TensorBoard conversion to prototype (squash)
+=======
+>>>>>>> 9e8b87c... TensorBoard conversion to prototype (squash)
       args: [
         $.params.logDir,
         "--port=9000"
@@ -109,6 +112,9 @@
       command: [
 		              "/usr/local/bin/tensorboard"
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> 9e8b87c... TensorBoard conversion to prototype (squash)
+=======
 >>>>>>> 9e8b87c... TensorBoard conversion to prototype (squash)
 =======
 >>>>>>> 9e8b87c... TensorBoard conversion to prototype (squash)
