@@ -1,13 +1,9 @@
 {
-<<<<<<< HEAD
-  all(params):: {
-=======
   all(params):: [
     $.configMap(params),
   ],
 
   configMap(params):: {
->>>>>>> upstream/master
     kind: "ConfigMap",
     apiVersion: "v1",
     metadata: {
@@ -39,7 +35,11 @@
           index: index,
           name: params.name,
           namespace: params.namespace,
+<<<<<<< HEAD
           slots: if params.gpus > 1 then " slots=%d" % params.gpus else ""
+>>>>>>> upstream/master
+=======
+          slots: if params.gpus > 0 then " slots=%d" % params.gpus else ""
 >>>>>>> upstream/master
         },
         std.range(0, params.workers - 1)

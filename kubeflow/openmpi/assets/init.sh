@@ -65,7 +65,7 @@ cp /kubeflow/openmpi/assets/ssh_config /root/.ssh/config
 /usr/sbin/sshd -D -e -f /kubeflow/openmpi/assets/sshd_config
 =======
 # Install redis-cli
-apt-get install -y redis-tools
+apt-get update && apt-get install -y redis-tools
 
 # Start sshd in daemon mode
 /usr/sbin/sshd -e -f /kubeflow/openmpi/assets/sshd_config

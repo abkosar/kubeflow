@@ -138,7 +138,7 @@
       restartPolicy: "Never",
       terminationGracePeriodSeconds: 30,
       dnsPolicy: "ClusterFirst",
-      schedulerName: "default-scheduler",
+      schedulerName: params.schedulerName,
       volumes: [
         {
           name: "kubeflow-openmpi-secrets",
