@@ -12,11 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-<<<<<<< HEAD
 IMG = gcr.io/kubeflow-images-staging/bootstraper
-=======
-IMG = gcr.io/kubeflow-images-public/bootstrapper
->>>>>>> 5eb0d72... permission bug fix and image tag update (#699)
 
 TAG := $(shell date +v%Y%m%d)-$(shell git describe --tags --always --dirty)-$(shell git diff | shasum -a256 | cut -c -6)
 

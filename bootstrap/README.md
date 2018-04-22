@@ -37,14 +37,10 @@ docker run -ti \
   -e USER=${USER} \
   -v ${APP_DIR_HOST}:/home/${USER}/${APP_FOLDER_DOCKER} \
   -v ${HOME}/.kube:/home/${USER}/.kube \
-<<<<<<< HEAD
   -v ${HOME}/.config:/home/${USER}/.config gcr.io/kubeflow-images-staging/bootstraper:latest
-=======
-  -v ${HOME}/.config:/home/${USER}/.config gcr.io/kubeflow-images-public/bootstrapper:latest
->>>>>>> 5eb0d72... permission bug fix and image tag update (#699)
 
 # Inside docker, run
-/opt/kubeflow/bootstrapper --app-dir=/home/${USER}/${APP_FOLDER_DOCKER}/<your_app_name> --namespace=<Your new namespace which hold bootstrap>
+/opt/kubeflow/bootstraper --app-dir=/home/${USER}/${APP_FOLDER_DOCKER}/<your_app_name> --namespace=<Your new namespace which hold bootstrap>
 
 # (Optional) enable usage reporting
 ks param set kubeflow-core reportUsage true
