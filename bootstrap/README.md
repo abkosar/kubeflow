@@ -21,7 +21,7 @@ and based on the results chooses good values for various Kubeflow parameters.
 
 **Alpha stage(as of today) Requires** run ```make build``` to build docker image locally since there's no public release yet.
 
-Interactive use 
+Interactive use
 
 ```
 TAG=latest
@@ -37,10 +37,10 @@ docker run -ti \
   -e USER=${USER} \
   -v ${APP_DIR_HOST}:/home/${USER}/${APP_FOLDER_DOCKER} \
   -v ${HOME}/.kube:/home/${USER}/.kube \
-  -v ${HOME}/.config:/home/${USER}/.config gcr.io/kubeflow-images-staging/bootstraper:latest
+  -v ${HOME}/.config:/home/${USER}/.config gcr.io/kubeflow-images-public/bootstrapper:latest
 
 # Inside docker, run
-/opt/kubeflow/bootstraper --app-dir=/home/${USER}/${APP_FOLDER_DOCKER}/<your_app_name> --namespace=<Your new namespace which hold bootstrap>
+/opt/kubeflow/bootstrapper --app-dir=/home/${USER}/${APP_FOLDER_DOCKER}/<your_app_name> --namespace=<Your new namespace which hold bootstrap>
 
 # (Optional) enable usage reporting
 ks param set kubeflow-core reportUsage true
@@ -136,13 +136,13 @@ Some options for dealing with this
 
 - Downside of this is that it violates the K8s philosophy of managing infrastructure
   declaratively
-- It also means salient details about the deployment aren't stored in the configs 
+- It also means salient details about the deployment aren't stored in the configs
   (ksonnet application) and versioned in source controle
 
 1. Wrap the resource creation/management in a CRD using kube-metacontroller
 
   - Example: [A CRD for managing Google Cloud Endpoints](https://github.com/danisla/cloud-endpoints-controller)
-  
+
   - One potential downside is that this may require extra permissions.
 
 ### No ordering to deployments

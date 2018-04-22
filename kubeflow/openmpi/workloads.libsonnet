@@ -193,6 +193,7 @@
             std.toString(params.workers),
             hostname,
             params.exec,
+            "openmpi-master"
           ],
           ports: [
             {
