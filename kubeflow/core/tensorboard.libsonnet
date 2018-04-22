@@ -89,12 +89,14 @@
       name: $.params.name,
       image: $.params.defaultTbImage,
       imagePullPolicy: "IfNotPresent",
-      args: [
-        $.params.logDir,
-        "--port=9000"
-      ],
+      //args: [
+      //  $.params.logDir,
+      //  "--port=9000"
+      //],
       command: [
-		              "/usr/local/bin/tensorboard"
+		              "/usr/local/bin/tensorboard",
+                  "--port=9000",
+                  "--logdir=" + $.params.logDir,
 		            ],
       ports: [
         {
