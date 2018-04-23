@@ -242,10 +242,6 @@ def deploy_kubeflow(args):
   logging.info("Verifying TfHub started.")
   util.wait_for_statefulset(api_client, namespace, jupyterhub_name)
 
-<<<<<<< HEAD
-
-=======
->>>>>>> upstream/master
 
 def deploy_model(args):
   """Deploy a TF model using the TF serving component."""

@@ -20,11 +20,6 @@ import (
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 
 	"reflect"
-<<<<<<< HEAD
-
-	"k8s.io/api/storage/v1"
-	k8sVersion "k8s.io/apimachinery/pkg/version"
-=======
 	"k8s.io/api/storage/v1"
 	k8sVersion "k8s.io/apimachinery/pkg/version"
 	"github.com/stretchr/testify/mock"
@@ -32,7 +27,6 @@ import (
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	type_v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"errors"
->>>>>>> upstream/master
 )
 
 func TestModifyGcloudCommand(t *testing.T) {
@@ -149,8 +143,6 @@ func TestHasDefaultStorageClass(t *testing.T) {
 		}
 	}
 }
-<<<<<<< HEAD
-=======
 
 type MockedNamespace struct{
 	mock.Mock
@@ -195,4 +187,3 @@ func TestSetupNamespace(t *testing.T) {
 	setupNamespace(mockedNamespace, "new")
 	mockedNamespace.AssertNumberOfCalls(t, "Create", 1)
 }
->>>>>>> upstream/master
